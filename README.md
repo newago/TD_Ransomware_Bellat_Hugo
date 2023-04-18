@@ -6,3 +6,5 @@ Il s'agit d'un chiffrement XOR. Il n'est pas solide car présente des faiblesses
 Question 2 :
 On ne hache pas la clé et le sel directement car on cherche à obtenir une clé unique dérivée de ce sel et de ce hash. Le HMAC permet de sécuriser la génération de la clé dérivée en utilisant un hachage sécurisé.
 
+Question 3 :
+Vérifier qu'un fichier token.bin n'existe pas déjà permet d'éviter d'écraser des données s'il y a eu une installation préalable par exemple (alors il y aurait déjà un fichier créé et l'écraser pourrait causer la perte de données importantes).
