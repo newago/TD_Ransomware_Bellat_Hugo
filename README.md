@@ -8,3 +8,6 @@ On ne hache pas la clé et le sel directement car on cherche à obtenir une clé
 
 Question 3 :
 Vérifier qu'un fichier token.bin n'existe pas déjà permet d'éviter d'écraser des données s'il y a eu une installation préalable par exemple (alors il y aurait déjà un fichier créé et l'écraser pourrait causer la perte de données importantes).
+
+Question 4 :
+Pour vérifier que la clé est la bonne, on déchiffre une partie d'un fichier avec et si le résultat est cohérent (si il ressemble à du texte lisible), c'est qu'on a la bonne clé. Sinon, il faut signaler que la clé est incorrecte.

